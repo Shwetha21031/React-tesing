@@ -24,6 +24,7 @@ test("adding positive numbers is not zero", () => {
 
 test("null", () => {
   const n = null;
+  // expect(n).toBeNull();
   expect(n).toBeNull();
   expect(n).toBeDefined();
   expect(n).not.toBeUndefined(); 
@@ -72,7 +73,6 @@ test('but there is a "stop" in Christoph', () => {
 
 // You can check if an array or iterable contains a particular item using toContain:
 const shoppingList = [
-  "diapers",
   "kleenex",
   "trash bags",
   "paper towels",

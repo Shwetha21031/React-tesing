@@ -1,20 +1,27 @@
-import rest  from "msw";
+import { http, graphql, HttpResponse } from 'msw'
 
 export const handlers = [
-  rest.get("https://jsonplaceholder.typicode.com/users", (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json([
-        {
-          name: "Bruce Wayne",
-        },
-        {
-          name: "Clark Kent",
-        },
-        {
-          name: "Princess Diana",
-        },
-      ])
-    );
+  http.get('https://api.example.com/user', () => {
+    return HttpResponse.json({
+      firstName: 'John',
+      lastName: 'Maverick',
+    })
   }),
-];
+  graphql.query('ListMovies', () => {
+    return HttpResponse.json({
+      data: {
+        movies: [
+          {
+            title: 'The Lord of The Rings',
+          },
+          {
+            title: 'The Matrix',
+          },
+          {
+            title: 'Star Wars: The Empire Strikes Back',
+          },
+        ],
+      },
+    })
+  }),
+]

@@ -1,0 +1,79 @@
+By using mock objects, developers can test their code in a repeatable and predictable way, which can save time and reduce the risk of errors in production.
+
+The purpose of mocking is to isolate and focus on the code being tested and not on the behavior or state of external dependencies.
+
+mockFn.mock.calls
+An array containing the call arguments of all calls that have been made to this mock function. Each item in the array is an array of arguments that were passed during the call.
+
+ mocking is the idea of replacing a function or part of a function with something that we explicitly control. A common example of this is a remote API call
+
+Jest.fn() is used to mock a single function, while jest.mock() is used to mock a whole module. jest.spyOn() is slightly different in that it captures more information about how the function was called. All three are related and can be useful in their own ways.
+
+All mock functions have this special .mock property, which is where data about how the function has been called and what the function returned is kept. The .mock property also tracks the value of this for each call, so it is possible to inspect this as well:
+
+
+Mocking Modules:
+Suppose we have a class that fetches users from our API. The class uses axios to call the API then returns the data attribute which contains all the users
+
+import axios from 'axios';
+
+class Users {
+  static all() {
+    return axios.get('/users.json').then(resp => resp.data);
+  }
+}
+
+export default Users;
+
+Now, in order to test this method without actually hitting the API (and thus creating slow and fragile tests), we can use the jest.mock(...) function to automatically mock the axios module.
+Once we mock the module we can provide a mockResolvedValue for .get that returns the data we want our test to assert against. In effect, we are saying that we want axios.get('/users.json') to return a fake response.
+
+import axios from 'axios';
+import Users from './users';
+
+jest.mock('axios');
+
+test('should fetch users', () => {
+  const users = [{name: 'Bob'}];
+  const resp = {data: users};
+  axios.get.mockResolvedValue(resp);
+
+  // or you could use the following depending on your use case:
+  // axios.get.mockImplementation(() => Promise.resolve(resp))
+
+  return Users.all().then(data => expect(data).toEqual(users));
+});
+
+
+Mocking Partials
+Subsets of a module can be mocked and the rest of the module can keep their actual implementation:
+
+foo-bar-baz.js
+export const foo = 'foo';
+export const bar = () => 'bar';
+export default () => 'baz';
+//test.js
+import defaultExport, {bar, foo} from '../foo-bar-baz';
+
+jest.mock('../foo-bar-baz', () => {
+  const originalModule = jest.requireActual('../foo-bar-baz');
+
+  //Mock the default export and named export 'foo'
+  return {
+    __esModule: true,
+    ...originalModule,
+    default: jest.fn(() => 'mocked baz'),
+    foo: 'mocked foo',
+  };
+});
+
+test('should do a partial mock', () => {
+  const defaultExportResult = defaultExport();
+  expect(defaultExportResult).toBe('mocked baz');
+  expect(defaultExport).toHaveBeenCalled();
+
+  expect(foo).toBe('mocked foo');
+  expect(bar()).toBe('bar');
+});
+
+
